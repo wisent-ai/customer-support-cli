@@ -1,0 +1,27 @@
+{
+  "name": "@wisent-ai/customer-support-cli",
+  "version": "0.1.0",
+  "description": "Deterministic customer support triage and queue operations CLI",
+  "type": "module",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wisent-ai/customer-support-cli.git"
+  },
+  "bin": {
+    "customer-support": "./src/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}
