@@ -1,0 +1,15 @@
+[automation]
+managed = true
+source_fingerprint = "cf251a97de3ac741"
+category = "developer"
+
+[banner]
+title = "Customer Support CLI builds. You ship faster."
+description = "Deterministic customer support triage and queue operations CLI"
+product = "Wisent"
+url = "wisent.com"
+theme = "dark"
+layout = "signal-left"
+art_seed = "customer-support-cli"
+width = 1584
+height = 396
