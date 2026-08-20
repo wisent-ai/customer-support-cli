@@ -1,11 +1,13 @@
 [automation]
 managed = true
-source_fingerprint = "cf251a97de3ac741"
+source_fingerprint = "8c64c0184788c6e5"
 category = "developer"
+copy_status = "missing"
+approved_in = ""
 
 [banner]
-title = "Customer Support CLI builds. You ship faster."
-description = "Deterministic customer support triage and queue operations CLI"
+title = "Customer Support CLI"
+description = ""
 product = "Wisent"
 url = "wisent.com"
 theme = "dark"
