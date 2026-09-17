@@ -19,7 +19,8 @@ pub(crate) const PRIORITIES: &[TicketPriority] = &[
     TicketPriority::Urgent,
 ];
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+// Variants are declared from least to most urgent; the derived order is the queue's ranking.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TicketPriority {
     Low,
@@ -31,17 +32,6 @@ pub enum TicketPriority {
 impl Default for TicketPriority {
     fn default() -> Self {
         Self::Normal
-    }
-}
-
-impl TicketPriority {
-    fn rank(self) -> u8 {
-        match self {
-            Self::Low => 0,
-            Self::Normal => 1,
-            Self::High => 2,
-            Self::Urgent => 3,
-        }
     }
 }
 

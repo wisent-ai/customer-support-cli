@@ -43,13 +43,7 @@ pub fn build_queue(
         right
             .breached
             .cmp(&left.breached)
-            .then_with(|| {
-                right
-                    .ticket
-                    .priority
-                    .rank()
-                    .cmp(&left.ticket.priority.rank())
-            })
+            .then_with(|| right.ticket.priority.cmp(&left.ticket.priority))
             .then_with(|| left.next_deadline.cmp(&right.next_deadline))
             .then_with(|| left.ticket.created_at.cmp(&right.ticket.created_at))
             .then_with(|| left.ticket.id.cmp(&right.ticket.id))
