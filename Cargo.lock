@@ -170,6 +170,7 @@ dependencies = [
  "clap",
  "serde",
  "serde_json",
+ "wisent-errors",
 ]
 
 [[package]]
@@ -530,6 +531,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc"
 dependencies = [
  "windows-link",
+]
+
+[[package]]
+name = "wisent-errors"
+version = "1.0.0"
+source = "git+https://github.com/wisent-ai/wisent-errors?rev=677c849044659ce17ca63d571293b69901a8e87a#677c849044659ce17ca63d571293b69901a8e87a"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

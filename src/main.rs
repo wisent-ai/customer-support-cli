@@ -1,14 +1,13 @@
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use chrono::Utc;
 use clap::{Parser, Subcommand};
 use customer_support_cli::{
     RoutingRule, SlaPolicy, Ticket, build_queue, build_timeline, compute_sla, normalize_ticket,
     parse_optional_date, route_ticket,
 };
-use serde::{Serialize, de::DeserializeOwned};
-use serde_json::Value;
+use wisent_errors::cli_output::{output, read_json};
 
 #[derive(Parser)]
 #[command(
@@ -75,44 +74,6 @@ enum Command {
         #[arg(long)]
         ticket: PathBuf,
     },
-}
-
-fn read_json<T: DeserializeOwned>(path: &PathBuf) -> Result<T> {
-    let input = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
-    serde_json::from_slice(&input).with_context(|| format!("invalid JSON in {}", path.display()))
-}
-
-/// JSON, or with `--text` the same document as one `path: value` line per
-/// field (cli.md rule 13).
-fn output<T: Serialize>(value: &T, text: bool) -> Result<()> {
-    let document = serde_json::to_value(value)?;
-    if !text {
-        println!("{}", serde_json::to_string_pretty(&document)?);
-        return Ok(());
-    }
-    let mut lines = Vec::new();
-    text_lines(&document, String::new(), &mut lines);
-    println!("{}", lines.join("\n"));
-    Ok(())
-}
-
-fn text_lines(node: &Value, path: String, lines: &mut Vec<String>) {
-    let child = |key: &str| if path.is_empty() { key.to_owned() } else { format!("{path}.{key}") };
-    match node {
-        Value::Array(items) if !items.is_empty() => {
-            for (index, item) in items.iter().enumerate() {
-                text_lines(item, format!("{path}[{index}]"), lines);
-            }
-        }
-        Value::Object(fields) if !fields.is_empty() => {
-            for (key, item) in fields {
-                text_lines(item, child(key), lines);
-            }
-        }
-        Value::String(value) => lines.push(format!("{path}: {value}")),
-        Value::Null | Value::Array(_) | Value::Object(_) => lines.push(format!("{path}: -")),
-        other => lines.push(format!("{path}: {other}")),
-    }
 }
 
 fn run() -> Result<()> {
