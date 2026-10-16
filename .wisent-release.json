@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "product": "customer-support-cli",
+  "releases": false,
+  "reason": "The repository holds no release workflow and no publish step, so the CLI is built from source with cargo and declares no package, image, hosted or versioned artifact publisher."
+}

@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use anyhow::Result;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use clap::{Parser, Subcommand};
 use customer_support_cli::{
     RoutingRule, SlaPolicy, Ticket, build_queue, build_timeline, compute_sla, normalize_ticket,
-    parse_optional_date, route_ticket,
+    parse_moment, route_ticket,
 };
 use wisent_errors::cli_output::{output, read_json};
 
@@ -40,9 +40,9 @@ enum Command {
         /// The SLA policy JSON file.
         #[arg(long)]
         policy: PathBuf,
-        /// The moment the queue is computed for (RFC 3339); now when omitted.
-        #[arg(long)]
-        at: Option<String>,
+        /// The moment the queue is computed for: an RFC 3339 date, or `now`.
+        #[arg(long, default_value = "now", value_parser = parse_moment)]
+        at: DateTime<Utc>,
         /// Keep resolved tickets in the queue.
         #[arg(long)]
         include_resolved: bool,
@@ -55,9 +55,9 @@ enum Command {
         /// The SLA policy JSON file.
         #[arg(long)]
         policy: PathBuf,
-        /// The moment the SLA is computed for (RFC 3339); now when omitted.
-        #[arg(long)]
-        at: Option<String>,
+        /// The moment the SLA is computed for: an RFC 3339 date, or `now`.
+        #[arg(long, default_value = "now", value_parser = parse_moment)]
+        at: DateTime<Utc>,
     },
     /// Pick the team a ticket goes to from ordered routing rules.
     Route {
@@ -88,30 +88,28 @@ fn run() -> Result<()> {
             policy,
             at,
             include_resolved,
-        } => {
-            let at = parse_optional_date(at.as_deref(), "--at")?.unwrap_or_else(Utc::now);
-            output(&build_queue(
+        } => output(
+            &build_queue(
                 read_json::<Vec<Ticket>>(&tickets)?,
                 &read_json::<SlaPolicy>(&policy)?,
                 at,
                 include_resolved,
-            )?, text)
-        }
+            )?,
+            text,
+        ),
         Command::Sla { ticket, policy, at } => {
             let ticket = normalize_ticket(read_json::<Ticket>(&ticket)?)?;
-            let at = parse_optional_date(at.as_deref(), "--at")?.unwrap_or_else(Utc::now);
-            output(&compute_sla(
-                &ticket,
-                &read_json::<SlaPolicy>(&policy)?,
-                at,
-            )?, text)
+            output(
+                &compute_sla(&ticket, &read_json::<SlaPolicy>(&policy)?, at)?,
+                text,
+            )
         }
         Command::Route { ticket, rules } => {
             let ticket = normalize_ticket(read_json::<Ticket>(&ticket)?)?;
-            output(&route_ticket(
-                &ticket,
-                read_json::<Vec<RoutingRule>>(&rules)?,
-            )?, text)
+            output(
+                &route_ticket(&ticket, read_json::<Vec<RoutingRule>>(&rules)?)?,
+                text,
+            )
         }
         Command::Timeline { ticket } => {
             let ticket = normalize_ticket(read_json::<Ticket>(&ticket)?)?;
@@ -120,9 +118,14 @@ fn run() -> Result<()> {
     }
 }
 
-fn main() {
-    if let Err(error) = run() {
-        eprintln!("{error:#}");
-        std::process::exit(1);
+/// Exit 1 (`ExitCode::FAILURE`) when an input could not be read or was
+/// refused, with the reason on stderr; clap exits 2 for a wrong invocation.
+fn main() -> std::process::ExitCode {
+    match run() {
+        Ok(()) => std::process::ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("{error:#}");
+            std::process::ExitCode::FAILURE
+        }
     }
 }

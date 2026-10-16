@@ -45,10 +45,10 @@ pub fn normalize_ticket(mut ticket: Ticket) -> Result<Ticket> {
     ticket.id = required(&ticket.id, "ticket.id")?;
     ticket.subject = optional(ticket.subject);
     ticket.created_at = format_date(parse_date(&ticket.created_at, "ticket.createdAt")?);
-    ticket.updated_at = Some(format_date(parse_date(
-        ticket.updated_at.as_deref().unwrap_or(&ticket.created_at),
-        "ticket.updatedAt",
-    )?));
+    ticket.updated_at = ticket
+        .updated_at
+        .map(|updated| parse_date(&updated, "ticket.updatedAt").map(format_date))
+        .transpose()?;
     ticket.channel = optional(ticket.channel);
     ticket.requester_id = optional(ticket.requester_id);
     ticket.assignee = optional(ticket.assignee);
@@ -71,6 +71,11 @@ pub fn normalize_ticket(mut ticket: Ticket) -> Result<Ticket> {
     ticket.events.sort_by(|left, right| left.at.cmp(&right.at));
     Ok(ticket)
 }
-pub fn parse_optional_date(value: Option<&str>, label: &str) -> Result<Option<DateTime<Utc>>> {
-    value.map(|item| parse_date(item, label)).transpose()
+/// The moment a computation is made for, as its caller states it: `now`, the
+/// time this reads it, or an RFC 3339 date.
+pub fn parse_moment(value: &str) -> Result<DateTime<Utc>> {
+    match value {
+        "now" => Ok(Utc::now()),
+        date => parse_date(date, "the moment"),
+    }
 }

@@ -17,12 +17,15 @@ with `--text` one `path: value` line per field from the same document.
 | Command | What it prints |
 |---|---|
 | `customer-support normalize --ticket <ticket.json>` | the ticket in canonical form |
-| `customer-support sla --ticket <ticket.json> --policy <policy.json> [--at <RFC 3339>]` | the ticket's SLA targets and whether they are met |
+| `customer-support sla --ticket <ticket.json> --policy <policy.json> [--at <RFC 3339 or now>]` | the ticket's SLA targets and whether they are met |
 | `customer-support route --ticket <ticket.json> --rules <rules.json>` | the team the first matching rule sends it to |
-| `customer-support queue --tickets <tickets.json> --policy <policy.json> [--at <RFC 3339>] [--include-resolved]` | open tickets ordered by how close each is to breaching |
+| `customer-support queue --tickets <tickets.json> --policy <policy.json> [--at <RFC 3339 or now>] [--include-resolved]` | open tickets ordered by how close each is to breaching |
 | `customer-support timeline --ticket <ticket.json>` | the ticket's events in time order |
 
-`--at` defaults to now. `--help` works on the program and on every command.
-Exit 2: the invocation is wrong (unknown command or flag, missing argument);
-exit 1: an input file could not be read, is not valid JSON, or was refused,
-with the reason on stderr.
+`--at` takes an RFC 3339 date or the word `now`, the moment the command reads
+it; `--help` shows `now` as its default. A ticket without `updatedAt` keeps none
+in canonical form: no update time is made up from `createdAt`. `--help` works on
+the program and on every command.
+Exit 2: the invocation is wrong (unknown command or flag, missing argument, an
+`--at` that is neither a date nor `now`); exit 1: an input file could not be
+read, is not valid JSON, or was refused, with the reason on stderr.
