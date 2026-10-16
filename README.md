@@ -29,3 +29,10 @@ the program and on every command.
 Exit 2: the invocation is wrong (unknown command or flag, missing argument, an
 `--at` that is neither a date nor `now`); exit 1: an input file could not be
 read, is not valid JSON, or was refused, with the reason on stderr.
+
+`cargo test --test moment_at` runs the built binary for a stated, omitted, `now`
+and refused `--at`, `--help` and a ticket with and without `updatedAt`. With
+`CUSTOMER_SUPPORT_JOURNEY_REPORT=<file>`, plus `CUSTOMER_SUPPORT_JOURNEY_SUBJECT`
+and `CUSTOMER_SUPPORT_JOURNEY_CRITERION` naming what it answers, a passed run on
+a committed tree writes a JSON report: source revision, binary and test digests,
+every command with its exit status, and the final state it observed.
